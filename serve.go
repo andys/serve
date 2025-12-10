@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/justinas/alice"
-	"github.com/kevinpollet/serve/log"
-	"github.com/kevinpollet/serve/middlewares"
+	"github.com/andys/serve/log"
+	"github.com/andys/serve/middlewares"
 )
 
 var (

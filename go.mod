@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/andybalholm/brotli v1.0.4
 	github.com/justinas/alice v1.2.0
-	github.com/kevinpollet/serve v0.0.0-20220109170338-5759ed9d6e12
 	github.com/sirupsen/logrus v1.8.1
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 )
