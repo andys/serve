@@ -29,7 +29,8 @@ const defaultAutoIndexTemplate = `
 type FileServer struct {
 	autoIndex     bool
 	autoIndexTmpl *template.Template
-	fileSystem    dotFileHidingFileSystem
+	fileSystem    FileSystemWithStat
+	allowDots     bool
 	middlewares   []alice.Constructor
 }
 
@@ -38,12 +39,18 @@ func NewFileServer(dir string, options ...Option) http.Handler {
 	autoIndexTmpl := template.New("autoIndex")
 
 	fs := &FileServer{
-		fileSystem:    dotFileHidingFileSystem{http.Dir(dir)},
 		autoIndexTmpl: template.Must(autoIndexTmpl.Parse(defaultAutoIndexTemplate)),
 	}
 
 	for _, option := range options {
 		option(fs)
+	}
+
+	// Choose filesystem based on allowDots setting
+	if fs.allowDots {
+		fs.fileSystem = regularFileSystem{http.Dir(dir)}
+	} else {
+		fs.fileSystem = dotFileHidingFileSystem{http.Dir(dir)}
 	}
 
 	return alice.New(fs.middlewares...).Then(fs)

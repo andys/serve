@@ -14,24 +14,26 @@ import (
 )
 
 var (
-	flagAddr     = flag.String("addr", "127.0.0.1:8080", "")
-	flagAuth     = flag.String("auth", "", "")
-	flagAuthFile = flag.String("auth-file", "", "")
-	flagDir      = flag.String("dir", ".", "")
-	flagCert     = flag.String("cert", "", "")
-	flagKey      = flag.String("key", "", "")
+	flagAddr       = flag.String("addr", "127.0.0.1:8080", "")
+	flagAuth       = flag.String("auth", "", "")
+	flagAuthFile   = flag.String("auth-file", "", "")
+	flagDir        = flag.String("dir", ".", "")
+	flagCert       = flag.String("cert", "", "")
+	flagKey        = flag.String("key", "", "")
+	flagAllowDots  = flag.Bool("allow-dots", false, "")
 )
 
 const usage = `Usage: serve [options]
 
 Options:
--addr       Sets the server address. Default is "127.0.0.1:8080".
--auth       Sets the basic auth credentials (password must be hashed with bcrypt and escaped with '').
--auth-file  Sets the basic auth credentials following the ".htpasswd" format.
--dir        Sets the directory containing the files to serve. Default is ".".
--cert       Sets the TLS certificate.
--key        Sets the TLS private key.
--help       Prints this text.
+-addr         Sets the server address. Default is "127.0.0.1:8080".
+-auth         Sets the basic auth credentials (password must be hashed with bcrypt and escaped with '').
+-auth-file    Sets the basic auth credentials following the ".htpasswd" format.
+-dir          Sets the directory containing the files to serve. Default is ".".
+-cert         Sets the TLS certificate.
+-key          Sets the TLS private key.
+-allow-dots   Allow serving dotfiles and directories. Default is false.
+-help         Prints this text.
 `
 
 func main() {
@@ -77,11 +79,18 @@ func main() {
 		middlewares.EncodingDeflate,
 	))
 
+	var options []Option
+	options = append(options, WithMiddlewares(handlers...))
+	
+	if *flagAllowDots {
+		options = append(options, WithAllowDots())
+	}
+
 	server := http.Server{
 		Addr:         *flagAddr,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Handler:      NewFileServer(*flagDir, WithMiddlewares(handlers...)),
+		Handler:      NewFileServer(*flagDir, options...),
 	}
 
 	log.Logger().Printf("server is listening on: %s", server.Addr)

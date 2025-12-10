@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+// FileSystemWithStat extends http.FileSystem to include OpenWithStat method.
+type FileSystemWithStat interface {
+	Open(name string) (http.File, error)
+	OpenWithStat(name string) (http.File, os.FileInfo, error)
+}
+
 type dotFileHidingFile struct {
 	http.File
 }
@@ -66,4 +72,22 @@ func containsDotFile(name string) bool {
 	}
 
 	return false
+}
+
+type regularFileSystem struct {
+	http.FileSystem
+}
+
+func (fs regularFileSystem) OpenWithStat(name string) (http.File, os.FileInfo, error) {
+	file, err := fs.FileSystem.Open(name)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return file, fileInfo, nil
 }

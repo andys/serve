@@ -18,3 +18,10 @@ func WithMiddlewares(middlewares ...alice.Constructor) Option {
 		fs.middlewares = middlewares
 	}
 }
+
+// WithAllowDots enables serving dotfiles and directories.
+func WithAllowDots() Option {
+	return func(fs *FileServer) {
+		fs.allowDots = true
+	}
+}
